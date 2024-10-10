@@ -6,7 +6,7 @@
 // VGA settings
 #define VGA_BUFFER_WIDTH 80
 #define VGA_BUFFER_HEIGHT 25
-#define VGA_BUFFER_ADDRESS 0xB8000
+#define VGA_BUFFER_ADDRESS 0xC00B8000
 
 // VGA colors
 enum vga_color {
@@ -37,5 +37,6 @@ void vga_write_char(char ch);
 void vga_write_string(const char* str);
 void vga_clear_screen();
 void vga_new_line();
+void vga_backspace();
 
 #endif

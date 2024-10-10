@@ -1,13 +1,13 @@
 #include <arch/i386/gdt.h>
 #include <arch/i386/ports.h>
 #include <kernel/stdio.h>
-#include <kernel/util.h>
+#include <kernel/memory.h>
 
-struct gdt_entry gdt[6] __attribute__((aligned(8)));
+struct gdt_entry gdt[6];
 struct gdt_ptr gp;
 struct tss_entry tss;
 
-extern void load_gdt(uint32_t);
+extern void load_gdt(struct gdt_ptr*);
 extern void load_tss();
 
 struct gdt_entry create_gdt_entry(uint32_t base, uint32_t limit, uint8_t access, uint8_t granularity) {
@@ -72,7 +72,7 @@ void gdt_init() {
     gdt[2] = create_gdt_entry(0, 0xFFFFFFFF, 0x92, 0xCF);
     gdt[3] = create_gdt_entry(0, 0xFFFFFFFF, 0xFA, 0xCF);
     gdt[4] = create_gdt_entry(0, 0xFFFFFFFF, 0xF2, 0xCF);
-    gdt[6] = create_tss_entry(0x10, 0);
+    gdt[5] = create_tss_entry(0x10, 0);
 
     gp.limit = (sizeof(struct gdt_entry) * 6) - 1;
     gp.base = (uint32_t) &gdt;
@@ -80,7 +80,7 @@ void gdt_init() {
     print_gdt();
 
     serial_write_string("Loading GDT...\n");
-    load_gdt((uint32_t) &gp);
+    load_gdt(&gp);
     serial_write_string("GDT loaded.\n");
 
     serial_write_string("Loading TSS...\n");

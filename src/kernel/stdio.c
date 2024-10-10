@@ -1,5 +1,10 @@
 #include <lib/stdint.h>
 #include <kernel/stdio.h>
+#include <kernel/vga.h>
+
+void putchar(char c) {
+    vga_write_char(c);
+}
 
 static void itoa(int value, char* str, int base) {
     char* ptr = str;
@@ -57,7 +62,6 @@ static void uitoa(uint32_t value, char* str, int base) {
     }
     *ptr-- = '\0';
 
-    // Reverse the string
     while (ptr1 < ptr) {
         tmp_char = *ptr;
         *ptr-- = *ptr1;
@@ -65,6 +69,24 @@ static void uitoa(uint32_t value, char* str, int base) {
     }
 }
 
+int printf(const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    int result = vprintf(format, args);
+    va_end(args);
+    return result;
+}
+
+int vprintf(const char *format, va_list args) {
+    char buffer[1024];
+    int len = vsnprintf(buffer, sizeof(buffer), format, args);
+    
+    for (int i = 0; i < len; i++) {
+        putchar(buffer[i]);
+    }
+    
+    return len;
+}
 
 int vsnprintf(char *str, size_t size, const char *format, va_list args) {
     size_t i = 0;
@@ -99,6 +121,11 @@ int vsnprintf(char *str, size_t size, const char *format, va_list args) {
                 while (*arg_str && str_index < size - 1) {
                     str[str_index++] = *arg_str++;
                 }
+            } else if (format[i] == 'c') {
+                char c = (char) va_arg(args, int);
+                if (str_index < size - 1) {
+                    str[str_index++] = c;
+                }
             }
         } else {
             str[str_index++] = format[i];
@@ -109,6 +136,7 @@ int vsnprintf(char *str, size_t size, const char *format, va_list args) {
     str[str_index] = '\0';
     return str_index;
 }
+
 
 int snprintf(char *str, size_t size, const char *format, ...) {
     va_list args;

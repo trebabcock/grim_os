@@ -2,7 +2,7 @@ CC = gcc
 ASM = nasm
 LD = ld
 CFLAGS = -g -c -I./include -ffreestanding -fno-stack-protector -m32
-LDFLAGS = -T linker.ld -m elf_i386
+LDFLAGS = -T linker.ld -m elf_i386 -g
 ASMFLAGS = -f elf32
 QEMU = qemu-system-i386
 
@@ -36,7 +36,7 @@ iso: kernel.elf
 # Compile assembly files and output to build directory
 $(BUILD_DIR)/%.o: src/%.asm
 	@mkdir -p $(dir $@)  # Ensure directory exists for object file
-	$(ASM) -f elf32 $< -o $@
+	$(ASM) $(ASMFLAGS) $< -o $@
 
 # Compile C files and output to build directory
 $(BUILD_DIR)/%.o: src/%.c
@@ -59,5 +59,8 @@ clean-objects:
 # Run the kernel in QEMU
 run: all
 	$(QEMU) $(QEMUFLAGS)
+
+run-debug: QEMUFLAGS += -s -S
+run-debug: run
 
 .PHONY: all iso clean run clean-objects

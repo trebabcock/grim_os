@@ -1,0 +1,6 @@
+*.o
+*.iso
+build
+iso
+.vscode
+.idea

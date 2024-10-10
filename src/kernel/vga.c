@@ -1,8 +1,7 @@
 #include <kernel/vga.h>
 #include <lib/stdint.h>
 
-// The VGA buffer starts at 0xB8000
-static volatile uint16_t* vga_buffer = (uint16_t*) VGA_BUFFER_ADDRESS;
+uint16_t* const vga_buffer = (uint16_t*) VGA_BUFFER_ADDRESS;
 static uint32_t vga_row = 0;
 static uint32_t vga_col = 0;
 static enum vga_color color = VGA_COLOR_GREEN | VGA_COLOR_BLACK << 4;
@@ -60,4 +59,19 @@ void vga_new_line() {
         vga_row++;
     }
     vga_col = 0;
+}
+
+void vga_backspace() {
+    if (vga_col > 0) {
+        vga_col--;
+        uint32_t index = vga_row * VGA_BUFFER_WIDTH + vga_col;
+        vga_buffer[index] = ((uint16_t)color << 8) | ' ';
+    } else {
+        if (vga_row > 0) {
+            vga_row--;
+            vga_col = VGA_BUFFER_WIDTH - 1;
+            uint32_t index = vga_row * VGA_BUFFER_WIDTH + vga_col;
+            vga_buffer[index] = ((uint16_t)color << 8) | ' ';
+        }
+    }
 }
